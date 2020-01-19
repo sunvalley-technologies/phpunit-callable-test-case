@@ -2,6 +2,7 @@
 
 namespace SunValley\Tests\CallableUtil;
 
+use PHPUnit\Framework\MockObject\Matcher\Invocation;
 use SunValley\LoopUtil\Common\Message\Exception\MessageException;
 
 trait CallableTestTrait
@@ -37,28 +38,35 @@ trait CallableTestTrait
         return $mock;
     }
 
-    protected function expectCallableOnceWithException(string $class)
+    protected function expectCallableManyWithClass(string $class)
     {
-        if (!is_a($class, \Throwable::class, true)) {
-            throw new \InvalidArgumentException('Requires an exception');
-        }
+        return $this->expectCallableWithClass($class, $this->atLeastOnce());
+    }
+
+    protected function expectCallableOnceWithClass(string $class)
+    {
+        return $this->expectCallableWithClass($class, $this->once());
+    }
+
+    protected function expectCallableWithClass(string $class, Invocation $times = null)
+    {
+        $times = $times ?? $this->any();
 
         $mock = $this->createCallableMock();
         $mock
-            ->expects($this->once())
+            ->expects($times)
             ->method('__invoke')
             ->with(
                 $this->callback(
-                    function (\Throwable $e) use($class) {
-                        $check = $e instanceof $class;
-                        $this->assertTrue($check, $check ? '' : $e);
+                    function (object $e) use ($class) {
+                        return $e instanceof $class;
                     }
                 )
             );
 
         return $mock;
     }
-
+    
     protected function expectCallableNever()
     {
         $mock = $this->createCallableMock();
