@@ -2,6 +2,8 @@
 
 namespace SunValley\Tests\CallableUtil;
 
+use SunValley\LoopUtil\Common\Message\Exception\MessageException;
+
 trait CallableTestTrait
 {
     protected function expectCallableExactly($amount)
@@ -35,6 +37,28 @@ trait CallableTestTrait
         return $mock;
     }
 
+    protected function expectCallableOnceWithException(string $class)
+    {
+        if (!is_a($class, \Throwable::class, true)) {
+            throw new \InvalidArgumentException('Requires an exception');
+        }
+
+        $mock = $this->createCallableMock();
+        $mock
+            ->expects($this->once())
+            ->method('__invoke')
+            ->with(
+                $this->callback(
+                    function (\Throwable $e) use($class) {
+                        $check = $e instanceof $class;
+                        $this->assertTrue($check, $check ? '' : $e);
+                    }
+                )
+            );
+
+        return $mock;
+    }
+
     protected function expectCallableNever()
     {
         $mock = $this->createCallableMock();
@@ -51,4 +75,6 @@ trait CallableTestTrait
             ->getMockBuilder(CallableStub::class)
             ->getMock();
     }
+
+
 }
