@@ -2,8 +2,6 @@
 
 namespace SunValley\Tests\CallableUtil;
 
-use PHPUnit\Framework\MockObject\Matcher\Invocation;
-use SunValley\LoopUtil\Common\Message\Exception\MessageException;
 
 trait CallableTestTrait
 {
@@ -48,7 +46,10 @@ trait CallableTestTrait
         return $this->expectCallableWithClass($class, $this->once());
     }
 
-    protected function expectCallableWithClass(string $class, Invocation $times = null)
+    /**
+     * @param \PHPUnit\Framework\MockObject\Rule\InvocationOrder|\PHPUnit\Framework\MockObject\Matcher\Invocation $times
+     */
+    protected function expectCallableWithClass(string $class, object $times = null)
     {
         $times = $times ?? $this->any();
 
